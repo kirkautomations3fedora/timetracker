@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Tracker</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2e3345;
+    --text: #e4e6f0;
+    --text-dim: #8b8fa3;
+    --accent: #6c5ce7;
+    --accent-hover: #7e70f0;
+    --green: #00b894;
+    --red: #e17055;
+    --orange: #fdcb6e;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 800px;
+    padding: 24px 16px;
+  }
+
+  header {
+    text-align: center;
+    padding: 32px 0 24px;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  header .subtitle {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-top: 4px;
+  }
+
+  /* Setup Screen */
+  #setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  #setup p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.5;
+  }
+
+  #setup input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    width: 100%;
+    max-width: 360px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #setup input:focus {
+    border-color: var(--accent);
+  }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn:hover { background: var(--accent-hover); }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .btn-outline:hover {
+    background: var(--surface2);
+  }
+
+  .btn-green { background: var(--green); }
+  .btn-green:hover { background: #00d2a0; }
+  .btn-red { background: var(--red); }
+  .btn-red:hover { background: #e8836b; }
+
+  /* Clock Section */
+  .clock-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .clock-section .greeting {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+  }
+
+  .clock-section .current-time {
+    font-size: 2.8rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin: 16px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .clock-section .status {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+
+  .status .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  .badge-in {
+    background: rgba(0,184,148,0.15);
+    color: var(--green);
+  }
+
+  .badge-out {
+    background: rgba(225,112,85,0.15);
+    color: var(--red);
+  }
+
+  .clock-btn {
+    padding: 16px 48px;
+    font-size: 1.1rem;
+    border-radius: 60px;
+    min-width: 200px;
+  }
+
+  .elapsed {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 12px;
+  }
+
+  /* Today's Log */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+
+  .card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .log-table th {
+    text-align: left;
+    color: var(--text-dim);
+    font-weight: 500;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .log-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(46,51,69,0.5);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .log-table tr:last-child td { border-bottom: none; }
+
+  .total-hours {
+    text-align: right;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 12px;
+    color: var(--accent);
+  }
+
+  /* Calendar / Report */
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .cal-nav .period {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .cal-nav button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+
+  .cal-nav button:hover { background: var(--border); }
+
+  .day-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .day-grid .day-header {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding: 6px 0;
+    font-weight: 600;
+  }
+
+  .day-cell {
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .day-cell:hover { background: var(--surface2); }
+
+  .day-cell.today {
+    border: 1px solid var(--accent);
+  }
+
+  .day-cell.has-hours::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--green);
+    margin: 2px auto 0;
+  }
+
+  .day-cell.selected {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .day-cell .hours-label {
+    display: block;
+    font-size: 0.65rem;
+    color: var(--green);
+    margin-top: 1px;
+  }
+
+  .day-cell.outside { color: var(--text-dim); opacity: 0.3; }
+
+  .period-summary {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+  }
+
+  .period-summary .label { color: var(--text-dim); }
+  .period-summary .value { font-weight: 700; }
+
+  /* Owner Report */
+  .employee-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(46,51,69,0.5);
+    font-size: 0.9rem;
+  }
+
+  .employee-row:last-child { border-bottom: none; }
+
+  .emp-name { font-weight: 600; }
+
+  .emp-hours {
+    font-variant-numeric: tabular-nums;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .link-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-size: 0.82rem;
+    word-break: break-all;
+    color: var(--text-dim);
+  }
+
+  .link-box .copy-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-dim);
+  }
+
+  .tab.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .tab:hover:not(.active) {
+    background: var(--surface2);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    font-size: 0.88rem;
+    transition: transform 0.3s ease;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .hidden { display: none !important; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+  }
+
+  .hash-display {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .hash-display code {
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--orange);
+  }
+
+  @media (max-width: 500px) {
+    .clock-section .current-time { font-size: 2rem; }
+    .container { padding: 16px 12px; }
+    .clock-section { padding: 24px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>⏱ Time Tracker</h1>
+    <div class="subtitle">Clock in. Clock out. Stay honest.</div>
+  </header>
+
+  <!-- SETUP SCREEN -->
+  <div id="setup">
+    <p>Enter your name to get a personal tracking link. No passwords, no accounts — just a unique hash for you.</p>
+    <input type="text" id="nameInput" placeholder="Your full name" autocomplete="name" />
+    <button class="btn" onclick="generateHash()">Get My Link</button>
+    <div style="margin-top: 24px; text-align: center;">
+      <p style="font-size: 0.82rem; color: var(--text-dim);">Already have a link? Just open it.<br>Owner? Enter the owner passphrase below.</p>
+      <input type="text" id="ownerInput" placeholder="Owner passphrase" style="margin-top: 8px;" />
+      <button class="btn btn-outline" style="margin-top: 8px;" onclick="generateOwnerHash()">Owner Access</button>
+    </div>
+  </div>
+
+  <!-- EMPLOYEE DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <div class="clock-section">
+      <div class="greeting" id="greeting">Good morning</div>
+      <div class="current-time" id="liveClock">--:--:--</div>
+      <div class="status" id="statusLine">Loading...</div>
+      <button class="btn clock-btn btn-green" id="clockBtn" onclick="toggleClock()" disabled>—</button>
+      <div class="elapsed hidden" id="elapsed"></div>
+      <div class="hash-display">Your link: <code id="hashDisplay"></code></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('today')">Today</div>
+      <div class="tab" onclick="switchTab('calendar')">Calendar</div>
+    </div>
+
+    <!-- Today Tab -->
+    <div id="tab-today">
+      <div class="card">
+        <h3>📋 Today's Log</h3>
+        <table class="log-table">
+          <thead><tr><th>In</th><th>Out</th><th>Duration</th></tr></thead>
+          <tbody id="todayLog"></tbody>
+        </table>
+        <div class="total-hours" id="todayTotal"></div>
+      </div>
+    </div>
+
+    <!-- Calendar Tab -->
+    <div id="tab-calendar" class="hidden">
+      <div class="card">
+        <div class="cal-nav">
+          <button onclick="shiftPeriod(-1)">‹</button>
+          <span class="period" id="periodLabel"></span>
+          <button onclick="shiftPeriod(1)">›</button>
+        </div>
+        <div class="day-grid" id="calGrid"></div>
+        <div class="period-summary">
+          <span class="label">Period Total</span>
+          <span class="value" id="periodTotal">0h 0m</span>
+        </div>
+      </div>
+      <div class="card hidden" id="dayDetail">
+        <h3>📅 <span id="dayDetailDate"></span></h3>
+        <table class="log-table">
+          <thead><tr><th>In</th><th>Out</th><th>Duration</th></tr></thead>
+          <tbody id="dayDetailLog"></tbody>
+        </table>
+        <div class="total-hours" id="dayDetailTotal"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNER DASHBOARD -->
+  <div id="ownerDash" class="hidden">
+    <div class="clock-section">
+      <div class="greeting">👑 Owner Dashboard</div>
+      <div class="current-time" id="ownerClock">--:--:--</div>
+      <div class="hash-display">Owner link: <code id="ownerHashDisplay"></code></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchOwnerTab('overview')">Overview</div>
+      <div class="tab" onclick="switchOwnerTab('employees')">Employees</div>
+    </div>
+
+    <div id="otab-overview">
+      <div class="card">
+        <div class="cal-nav">
+          <button onclick="shiftOwnerPeriod(-1)">‹</button>
+          <span class="period" id="ownerPeriodLabel"></span>
+          <button onclick="shiftOwnerPeriod(1)">›</button>
+        </div>
+        <div id="ownerReport"></div>
+        <div class="period-summary">
+          <span class="label">Company Total</span>
+          <span class="value" id="ownerPeriodTotal">0h 0m</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="otab-employees" class="hidden">
+      <div class="card">
+        <h3>👥 Registered Employees</h3>
+        <div id="employeeList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>Data stored in Google Sheets · Backed up weekly</footer>
+
+<script>
+// ═══════════════════════════════════════
+// CONFIG — Set your Apps Script URL here
+// ═══════════════════════════════════════
+const API_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let state = {
+  hash: null,
+  name: null,
+  isOwner: false,
+  isClockedIn: false,
+  clockInTime: null,
+  todayEntries: [],
+  calendarData: {},
+  periodStart: null,
+  ownerPeriodStart: null,
+  elapsedInterval: null,
+};
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+(function init() {
+  const h = location.hash.slice(1);
+  if (h) {
+    state.hash = h;
+    loadDashboard();
+  }
+  startLiveClock();
+})();
+
+// ═══════════════════════════════════════
+// HASHING
+// ═══════════════════════════════════════
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function generateHash() {
+  const name = document.getElementById('nameInput').value.trim();
+  if (!name) return toast('Enter your name');
+  const hash = (await sha256(name.toLowerCase())).slice(0, 12);
+  location.hash = hash;
+  state.hash = hash;
+  state.name = name;
+  // Register with backend
+  await api('register', { hash, name });
+  loadDashboard();
+}
+
+async function generateOwnerHash() {
+  const phrase = document.getElementById('ownerInput').value.trim();
+  if (!phrase) return toast('Enter the owner passphrase');
+  const hash = 'owner_' + (await sha256(phrase)).slice(0, 12);
+  location.hash = hash;
+  state.hash = hash;
+  state.isOwner = true;
+  loadDashboard();
+}
+
+// ═══════════════════════════════════════
+// API
+// ═══════════════════════════════════════
+async function api(action, data = {}) {
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' }, // Apps Script CORS workaround
+      body: JSON.stringify({ action, ...data }),
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('API error:', e);
+    toast('Connection error — check your setup');
+    return { error: e.message };
+  }
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+async function loadDashboard() {
+  const hash = state.hash;
+  if (hash.startsWith('owner_')) {
+    state.isOwner = true;
+    document.getElementById('setup').classList.add('hidden');
+    document.getElementById('ownerDash').classList.remove('hidden');
+    document.getElementById('ownerHashDisplay').textContent = location.href;
+    state.ownerPeriodStart = getPeriodStart(new Date());
+    loadOwnerReport();
+    return;
+  }
+
+  // Employee view
+  const res = await api('status', { hash });
+  if (res.error) return toast(res.error);
+
+  state.name = res.name || 'there';
+  state.isClockedIn = res.clockedIn || false;
+  state.clockInTime = res.clockInTime ? new Date(res.clockInTime) : null;
+  state.todayEntries = res.todayEntries || [];
+
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+
+  updateGreeting();
+  updateClockBtn();
+  renderTodayLog();
+  document.getElementById('hashDisplay').textContent = location.href;
+
+  state.periodStart = getPeriodStart(new Date());
+  if (state.isClockedIn) startElapsedTimer();
+}
+
+function updateGreeting() {
+  const h = new Date().getHours();
+  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  document.getElementById('greeting').textContent = `${g}, ${state.name}`;
+}
+
+function updateClockBtn() {
+  const btn = document.getElementById('clockBtn');
+  const line = document.getElementById('statusLine');
+  btn.disabled = false;
+
+  if (state.isClockedIn) {
+    btn.textContent = 'Clock Out';
+    btn.className = 'btn clock-btn btn-red';
+    line.innerHTML = `Status: <span class="badge badge-in">Clocked In</span>`;
+  } else {
+    btn.textContent = 'Clock In';
+    btn.className = 'btn clock-btn btn-green';
+    line.innerHTML = `Status: <span class="badge badge-out">Clocked Out</span>`;
+    stopElapsedTimer();
+  }
+}
+
+// ═══════════════════════════════════════
+// CLOCK IN / OUT
+// ═══════════════════════════════════════
+async function toggleClock() {
+  const btn = document.getElementById('clockBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Working...';
+
+  const action = state.isClockedIn ? 'clockOut' : 'clockIn';
+  const res = await api(action, { hash: state.hash });
+
+  if (res.error) {
+    toast(res.error);
+    btn.disabled = false;
+    updateClockBtn();
+    return;
+  }
+
+  state.isClockedIn = !state.isClockedIn;
+  state.todayEntries = res.todayEntries || state.todayEntries;
+  state.clockInTime = state.isClockedIn ? new Date() : null;
+
+  updateClockBtn();
+  renderTodayLog();
+  toast(state.isClockedIn ? '✅ Clocked in!' : '🔴 Clocked out!');
+
+  if (state.isClockedIn) startElapsedTimer();
+}
+
+// ═══════════════════════════════════════
+// ELAPSED TIMER
+// ═══════════════════════════════════════
+function startElapsedTimer() {
+  const el = document.getElementById('elapsed');
+  el.classList.remove('hidden');
+  clearInterval(state.elapsedInterval);
+  state.elapsedInterval = setInterval(() => {
+    if (!state.clockInTime) return;
+    const diff = Date.now() - state.clockInTime.getTime();
+    el.textContent = `Current session: ${formatDuration(diff)}`;
+  }, 1000);
+}
+
+function stopElapsedTimer() {
+  clearInterval(state.elapsedInterval);
+  document.getElementById('elapsed').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+// TODAY LOG
+// ═══════════════════════════════════════
+function renderTodayLog() {
+  const tbody = document.getElementById('todayLog');
+  tbody.innerHTML = '';
+  let totalMs = 0;
+
+  state.todayEntries.forEach(e => {
+    const tr = document.createElement('tr');
+    const inTime = new Date(e.clockIn);
+    const outTime = e.clockOut ? new Date(e.clockOut) : null;
+    const dur = outTime ? outTime - inTime : Date.now() - inTime;
+    totalMs += dur;
+
+    tr.innerHTML = `
+      <td>${fmtTime(inTime)}</td>
+      <td>${outTime ? fmtTime(outTime) : '<em style="color:var(--green)">active</em>'}</td>
+      <td>${formatDuration(dur)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (state.todayEntries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-dim); text-align:center; padding:16px;">No entries today</td></tr>';
+  }
+
+  document.getElementById('todayTotal').textContent = `Total: ${formatDuration(totalMs)}`;
+}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tabs .tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'today' && i === 0) || (tab === 'calendar' && i === 1));
+  });
+  document.getElementById('tab-today').classList.toggle('hidden', tab !== 'today');
+  document.getElementById('tab-calendar').classList.toggle('hidden', tab !== 'calendar');
+
+  if (tab === 'calendar') loadCalendar();
+}
+
+// ═══════════════════════════════════════
+// CALENDAR (2-WEEK PERIODS)
+// ═══════════════════════════════════════
+function getPeriodStart(date) {
+  // Periods start on Monday, 2-week blocks anchored to epoch
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = (day === 0 ? 6 : day - 1); // days since Monday
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  // Align to 2-week boundary from a reference Monday (Jan 1 2024 was a Monday)
+  const ref = new Date(2024, 0, 1);
+  const weeks = Math.floor((d - ref) / (7 * 86400000));
+  const periodWeeks = Math.floor(weeks / 2) * 2;
+  const aligned = new Date(ref.getTime() + periodWeeks * 7 * 86400000);
+  return aligned;
+}
+
+function shiftPeriod(dir) {
+  state.periodStart = new Date(state.periodStart.getTime() + dir * 14 * 86400000);
+  loadCalendar();
+}
+
+async function loadCalendar() {
+  const start = state.periodStart;
+  const end = new Date(start.getTime() + 14 * 86400000 - 1);
+  document.getElementById('periodLabel').textContent =
+    `${fmtDate(start)} — ${fmtDate(end)}`;
+
+  const res = await api('getEntries', {
+    hash: state.hash,
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+  });
+
+  const entries = res.entries || [];
+  const dayMap = {};
+  entries.forEach(e => {
+    const day = e.date;
+    if (!dayMap[day]) dayMap[day] = [];
+    dayMap[day].push(e);
+  });
+
+  state.calendarData = dayMap;
+  renderCalendar(start, dayMap);
+}
+
+function renderCalendar(periodStart, dayMap) {
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  const headers = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  headers.forEach(h => {
+    const div = document.createElement('div');
+    div.className = 'day-header';
+    div.textContent = h;
+    grid.appendChild(div);
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  let totalMs = 0;
+
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(periodStart.getTime() + i * 86400000);
+    const key = d.toISOString().slice(0, 10);
+    const dayEntries = dayMap[key] || [];
+    let dayMs = 0;
+    dayEntries.forEach(e => { dayMs += (e.durationMs || 0); });
+    totalMs += dayMs;
+
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    if (d.getTime() === today.getTime()) cell.classList.add('today');
+    if (dayMs > 0) cell.classList.add('has-hours');
+
+    cell.innerHTML = `${d.getDate()}${dayMs > 0 ? `<span class="hours-label">${(dayMs/3600000).toFixed(1)}h</span>` : ''}`;
+    cell.onclick = () => showDayDetail(key, dayEntries);
+    grid.appendChild(cell);
+  }
+
+  document.getElementById('periodTotal').textContent = formatDuration(totalMs);
+}
+
+function showDayDetail(dateStr, entries) {
+  const card = document.getElementById('dayDetail');
+  card.classList.remove('hidden');
+  document.getElementById('dayDetailDate').textContent = dateStr;
+  const tbody = document.getElementById('dayDetailLog');
+  tbody.innerHTML = '';
+  let total = 0;
+
+  entries.forEach(e => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${e.clockIn || '—'}</td><td>${e.clockOut || '<em>active</em>'}</td><td>${formatDuration(e.durationMs || 0)}</td>`;
+    tbody.appendChild(tr);
+    total += (e.durationMs || 0);
+  });
+
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-dim); text-align:center;">No entries</td></tr>';
+  }
+
+  document.getElementById('dayDetailTotal').textContent = `Total: ${formatDuration(total)}`;
+}
+
+// ═══════════════════════════════════════
+// OWNER VIEWS
+// ═══════════════════════════════════════
+function switchOwnerTab(tab) {
+  document.querySelectorAll('#ownerDash .tabs .tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'overview' && i === 0) || (tab === 'employees' && i === 1));
+  });
+  document.getElementById('otab-overview').classList.toggle('hidden', tab !== 'overview');
+  document.getElementById('otab-employees').classList.toggle('hidden', tab !== 'employees');
+
+  if (tab === 'employees') loadEmployeeList();
+  if (tab === 'overview') loadOwnerReport();
+}
+
+function shiftOwnerPeriod(dir) {
+  state.ownerPeriodStart = new Date(state.ownerPeriodStart.getTime() + dir * 14 * 86400000);
+  loadOwnerReport();
+}
+
+async function loadOwnerReport() {
+  const start = state.ownerPeriodStart;
+  const end = new Date(start.getTime() + 14 * 86400000 - 1);
+  document.getElementById('ownerPeriodLabel').textContent =
+    `${fmtDate(start)} — ${fmtDate(end)}`;
+
+  const res = await api('ownerReport', {
+    hash: state.hash,
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+  });
+
+  const report = res.report || [];
+  const container = document.getElementById('ownerReport');
+  container.innerHTML = '';
+  let companyTotal = 0;
+
+  report.forEach(emp => {
+    companyTotal += (emp.totalMs || 0);
+    const row = document.createElement('div');
+    row.className = 'employee-row';
+    row.innerHTML = `<span class="emp-name">${emp.name}</span><span class="emp-hours">${formatDuration(emp.totalMs || 0)}</span>`;
+    container.appendChild(row);
+  });
+
+  if (report.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:16px;">No data for this period</div>';
+  }
+
+  document.getElementById('ownerPeriodTotal').textContent = formatDuration(companyTotal);
+}
+
+async function loadEmployeeList() {
+  const res = await api('listEmployees', { hash: state.hash });
+  const employees = res.employees || [];
+  const container = document.getElementById('employeeList');
+  container.innerHTML = '';
+
+  employees.forEach(emp => {
+    const row = document.createElement('div');
+    row.className = 'employee-row';
+    const link = `${location.origin}${location.pathname}#${emp.hash}`;
+    row.innerHTML = `
+      <div>
+        <div class="emp-name">${emp.name}</div>
+        <div class="link-box">${link} <button class="copy-btn" onclick="copyText('${link}')">Copy</button></div>
+      </div>
+      <span class="badge ${emp.clockedIn ? 'badge-in' : 'badge-out'}">${emp.clockedIn ? 'In' : 'Out'}</span>
+    `;
+    container.appendChild(row);
+  });
+
+  if (employees.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-dim);text-align:center;padding:16px;">No employees registered yet</div>';
+  }
+}
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function fmtTime(d) {
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtDate(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatDuration(ms) {
+  if (!ms || ms < 0) return '0m';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function startLiveClock() {
+  function tick() {
+    const now = new Date();
+    const str = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const el = document.getElementById('liveClock');
+    if (el) el.textContent = str;
+    const oel = document.getElementById('ownerClock');
+    if (oel) oel.textContent = str;
+  }
+  tick();
+  setInterval(tick, 1000);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+  toast('Copied!');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
