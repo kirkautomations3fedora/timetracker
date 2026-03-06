@@ -582,7 +582,10 @@
 // ═══════════════════════════════════════
 // CONFIG — Set your Apps Script URL here
 // ═══════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbxDsfCKVBa2zsXwfvuE-s2L9YdjF1Ia-UYaWT3PgYDAlmuB2W1cxErtUYEKxXyDvG5o/exec';
+// API URL: auto-detect based on where the page is served from
+// When served from the Node.js server (localhost:3001), use relative path
+// When served from GitHub Pages, it'll try the local server on the network
+const API_URL = location.origin + '/api';
 
 // ═══════════════════════════════════════
 // STATE
