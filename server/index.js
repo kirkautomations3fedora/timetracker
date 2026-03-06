@@ -27,12 +27,11 @@ app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
 }));
 app.use(express.json());
 app.use(express.text({ type: 'text/plain' }));
-
-// Explicit OPTIONS handler for preflight
-app.options('*', cors());
 
 // Serve the frontend
 app.use(express.static(path.join(__dirname, '..')));
