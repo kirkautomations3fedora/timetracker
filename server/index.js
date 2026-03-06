@@ -23,9 +23,16 @@ function scheduleSheetsSync() {
   }, 2000);
 }
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(express.json());
 app.use(express.text({ type: 'text/plain' }));
+
+// Explicit OPTIONS handler for preflight
+app.options('*', cors());
 
 // Serve the frontend
 app.use(express.static(path.join(__dirname, '..')));

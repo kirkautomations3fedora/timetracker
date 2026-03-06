@@ -652,15 +652,19 @@ async function generateOwnerHash() {
 // ═══════════════════════════════════════
 async function api(action, data = {}) {
   try {
+    console.log(`[API] ${action} → ${API_URL}`);
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' }, // Apps Script CORS workaround
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, ...data }),
     });
-    return await res.json();
+    const json = await res.json();
+    console.log(`[API] ${action} ←`, json);
+    if (json.error) toast('Error: ' + json.error);
+    return json;
   } catch (e) {
     console.error('API error:', e);
-    toast('Connection error — check your setup');
+    toast('Connection error — ' + e.message);
     return { error: e.message };
   }
 }
