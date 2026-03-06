@@ -7,11 +7,19 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
+const crypto = require('crypto');
 const { syncToSheets, SHEET_ID } = require('./sheets-sync');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const DATA_FILE = path.join(__dirname, 'data.json');
+
+// Owner passkey: SHA-256('openclaw1').slice(0,12) prefixed with 'owner_'
+const OWNER_HASH = 'owner_' + crypto.createHash('sha256').update('openclaw1').digest('hex').slice(0, 12);
+
+function isValidOwner(hash) {
+  return hash === OWNER_HASH;
+}
 
 // Debounced sync to Google Sheets (sync 2s after last write)
 let syncTimer = null;
@@ -195,7 +203,7 @@ function getEntries(hash, startDate, endDate) {
 // OWNER REPORT
 // ═══════════════════════════════════════
 function ownerReport(ownerHash, startDate, endDate) {
-  if (!ownerHash.startsWith('owner_')) return { error: 'Unauthorized' };
+  if (!isValidOwner(ownerHash)) return { error: 'Unauthorized — invalid passkey' };
 
   const data = loadData();
   const start = startDate.slice(0, 10);
@@ -224,7 +232,7 @@ function ownerReport(ownerHash, startDate, endDate) {
 // LIST EMPLOYEES
 // ═══════════════════════════════════════
 function listEmployees(ownerHash) {
-  if (!ownerHash.startsWith('owner_')) return { error: 'Unauthorized' };
+  if (!isValidOwner(ownerHash)) return { error: 'Unauthorized — invalid passkey' };
 
   const data = loadData();
   return {

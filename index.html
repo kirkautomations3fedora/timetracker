@@ -478,9 +478,12 @@
     <input type="text" id="nameInput" placeholder="Your full name" autocomplete="name" />
     <button class="btn" onclick="generateHash()">Get My Link</button>
     <div style="margin-top: 24px; text-align: center;">
-      <p style="font-size: 0.82rem; color: var(--text-dim);">Already have a link? Just open it.<br>Owner? Enter the owner passphrase below.</p>
-      <input type="text" id="ownerInput" placeholder="Owner passphrase" style="margin-top: 8px;" />
-      <button class="btn btn-outline" style="margin-top: 8px;" onclick="generateOwnerHash()">Owner Access</button>
+      <p style="font-size: 0.82rem; color: var(--text-dim);">Already have a link? Just open it.</p>
+      <details style="margin-top: 12px;">
+        <summary style="font-size: 0.82rem; color: var(--text-dim); cursor: pointer;">Owner / Admin access</summary>
+        <input type="password" id="ownerInput" placeholder="Enter passkey" style="margin-top: 8px;" />
+        <button class="btn btn-outline" style="margin-top: 8px;" onclick="generateOwnerHash()">Unlock</button>
+      </details>
     </div>
   </div>
 
