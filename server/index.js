@@ -7,9 +7,21 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
+const { syncToSheets, SHEET_ID } = require('./sheets-sync');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const DATA_FILE = path.join(__dirname, 'data.json');
+
+// Debounced sync to Google Sheets (sync 2s after last write)
+let syncTimer = null;
+function scheduleSheetsSync() {
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const data = loadData();
+    syncToSheets(data).catch(() => {});
+  }, 2000);
+}
 
 app.use(cors());
 app.use(express.json());
@@ -83,6 +95,7 @@ function registerEmployee(hash, name) {
 
   data.employees.push({ hash, name, clockedIn: false, currentClockIn: '' });
   saveData(data);
+  scheduleSheetsSync();
   return { ok: true, name };
 }
 
@@ -115,6 +128,7 @@ function clockIn(hash) {
   emp.clockedIn = true;
   emp.currentClockIn = now;
   saveData(data);
+  scheduleSheetsSync();
 
   const todayEntries = getTodayEntries(data, hash);
   return { ok: true, todayEntries };
@@ -145,6 +159,7 @@ function clockOut(hash) {
   emp.clockedIn = false;
   emp.currentClockIn = '';
   saveData(data);
+  scheduleSheetsSync();
 
   const todayEntries = getTodayEntries(data, hash);
   return { ok: true, todayEntries };

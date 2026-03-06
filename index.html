@@ -583,9 +583,11 @@
 // CONFIG — Set your Apps Script URL here
 // ═══════════════════════════════════════
 // API URL: auto-detect based on where the page is served from
-// When served from the Node.js server (localhost:3001), use relative path
-// When served from GitHub Pages, it'll try the local server on the network
-const API_URL = location.origin + '/api';
+// When served from the Node.js server directly, use relative path
+// When served from GitHub Pages, use the tunnel URL
+const API_URL = location.origin.includes('github.io')
+  ? 'https://par-cure-reynolds-handmade.trycloudflare.com/api'
+  : location.origin + '/api';
 
 // ═══════════════════════════════════════
 // STATE
