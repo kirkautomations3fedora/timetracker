@@ -237,7 +237,6 @@ function listEmployees(ownerHash) {
   const data = loadData();
   return {
     employees: data.employees.map(e => ({
-      hash: e.hash,
       name: e.name,
       clockedIn: e.clockedIn,
     })),

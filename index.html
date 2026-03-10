@@ -998,11 +998,9 @@ async function loadEmployeeList() {
   employees.forEach(emp => {
     const row = document.createElement('div');
     row.className = 'employee-row';
-    const link = `${location.origin}${location.pathname}#${emp.hash}`;
     row.innerHTML = `
       <div>
         <div class="emp-name">${emp.name}</div>
-        <div class="link-box">${link} <button class="copy-btn" onclick="copyText('${link}')">Copy</button></div>
       </div>
       <span class="badge ${emp.clockedIn ? 'badge-in' : 'badge-out'}">${emp.clockedIn ? 'In' : 'Out'}</span>
     `;
