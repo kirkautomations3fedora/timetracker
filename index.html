@@ -479,11 +479,6 @@
     <button class="btn" onclick="generateHash()">Get My Link</button>
     <div style="margin-top: 24px; text-align: center;">
       <p style="font-size: 0.82rem; color: var(--text-dim);">Already have a link? Just open it.</p>
-      <details style="margin-top: 12px;">
-        <summary style="font-size: 0.82rem; color: var(--text-dim); cursor: pointer;">Owner / Admin access</summary>
-        <input type="password" id="ownerInput" placeholder="Enter passkey" style="margin-top: 8px;" />
-        <button class="btn btn-outline" style="margin-top: 8px;" onclick="generateOwnerHash()">Unlock</button>
-      </details>
     </div>
   </div>
 
@@ -640,15 +635,7 @@ async function generateHash() {
   loadDashboard();
 }
 
-async function generateOwnerHash() {
-  const phrase = document.getElementById('ownerInput').value.trim();
-  if (!phrase) return toast('Enter the owner passphrase');
-  const hash = 'owner_' + (await sha256(phrase)).slice(0, 12);
-  location.hash = hash;
-  state.hash = hash;
-  state.isOwner = true;
-  loadDashboard();
-}
+// Owner access is URL-only — no public UI to generate owner hash
 
 // ═══════════════════════════════════════
 // API
