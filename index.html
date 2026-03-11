@@ -586,9 +586,7 @@
 // API URL: auto-detect based on where the page is served from
 // When served from the Node.js server directly, use relative path
 // When served from GitHub Pages, use the tunnel URL
-const API_URL = location.origin.includes('github.io')
-  ? 'https://one-eddie-intranet-pensions.trycloudflare.com/api'
-  : location.origin + '/api';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw6NjDnK6PR1UYWj97Dttw62m8viXf9Rkp_Igmk0CPQXNaS448L33uECmrNp-ZNvCvL/exec';
 
 // ═══════════════════════════════════════
 // STATE
@@ -611,9 +609,10 @@ let state = {
 // ═══════════════════════════════════════
 (function init() {
   console.log('[TimeTracker] API_URL =', API_URL);
-  // Connection test on load
-  fetch(API_URL, { method: 'GET' })
-    .then(r => r.json())
+  // Connection test on load (Apps Script GET returns JSON status)
+  fetch(API_URL, { method: 'GET', redirect: 'follow' })
+    .then(r => r.text())
+    .then(t => { try { return JSON.parse(t); } catch { return { raw: t.slice(0, 100) }; } })
     .then(d => console.log('[TimeTracker] API reachable:', d))
     .catch(e => {
       console.error('[TimeTracker] API unreachable:', e);
@@ -662,17 +661,19 @@ async function api(action, data = {}) {
     console.log(`[API] ${action} → ${API_URL}`);
     const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ action, ...data }),
+      redirect: 'follow',
     });
-    const json = await res.json();
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch { json = { error: 'Invalid response: ' + text.slice(0, 200) }; }
     console.log(`[API] ${action} ←`, json);
     if (json.error) toast('Error: ' + json.error);
     return json;
   } catch (e) {
     console.error('API error:', e);
     toast('Connection error — check console');
-    // Show detailed error on page for debugging
     const errDiv = document.getElementById('connError');
     if (errDiv) {
       errDiv.classList.remove('hidden');
