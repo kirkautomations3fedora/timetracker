@@ -18,7 +18,9 @@ const OWNER_HASH = 'owner_' + crypto.createHash('sha256').update('openclaw1').di
 // Admin hashes — employees who get admin (view all + edit) access
 const ADMIN_HASHES = [
   '1e28b0f96e44',  // ester
-  '4c3b3284e206',  // mk (michael)
+  '4c3b3284e206',  // mk
+  '34550715062a',  // Michael
+  '64b4d0f47c93',  // Mike
 ];
 
 function isValidOwner(hash) {
