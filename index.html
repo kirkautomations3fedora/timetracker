@@ -844,6 +844,7 @@ let state = {
   calendarData: {}, periodStart: null, ownerPeriodStart: null,
   elapsedInterval: null,
   detailHash: null, detailName: null, detailWeekStart: null, detailContext: null,
+  todayUpdateInterval: null,
 };
 
 // ═══════════════════════════════════════
@@ -999,6 +1000,7 @@ function startElapsedTimer() {
 
 function stopElapsedTimer() {
   clearInterval(state.elapsedInterval);
+  clearInterval(state.todayUpdateInterval);
   document.getElementById('elapsed').classList.add('hidden');
 }
 
@@ -1009,6 +1011,8 @@ function renderTodayLog() {
   const tbody = document.getElementById('todayLog');
   tbody.innerHTML = '';
   let totalMs = 0;
+
+  // Show completed entries
   state.todayEntries.forEach(e => {
     const tr = document.createElement('tr');
     const inTime = new Date(e.clockIn);
@@ -1021,10 +1025,46 @@ function renderTodayLog() {
       <td>${formatDuration(dur)}</td>`;
     tbody.appendChild(tr);
   });
-  if (!state.todayEntries.length) {
+
+  // Show active clock-in session as a row
+  if (state.isClockedIn && state.clockInTime) {
+    const now = Date.now();
+    const activeDur = now - state.clockInTime.getTime();
+    totalMs += activeDur;
+    const tr = document.createElement('tr');
+    tr.id = 'activeSessionRow';
+    tr.innerHTML = `
+      <td>${fmtTime(state.clockInTime)}</td>
+      <td><span style="color:var(--green);font-weight:600;">● Active</span></td>
+      <td id="activeSessionDur">${formatDuration(activeDur)}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  if (!state.todayEntries.length && !state.isClockedIn) {
     tbody.innerHTML = `<tr><td colspan="3"><div class="empty-state"><div class="empty-icon">📋</div>No entries today</div></td></tr>`;
   }
-  document.getElementById('todayTotal').textContent = totalMs ? `Total: ${formatDuration(totalMs)}` : '';
+
+  document.getElementById('todayTotal').textContent = `Total: ${formatDuration(totalMs)}`;
+
+  // Keep the active row + total updating live
+  if (state.isClockedIn && state.clockInTime) {
+    clearInterval(state.todayUpdateInterval);
+    state.todayUpdateInterval = setInterval(() => {
+      const el = document.getElementById('activeSessionDur');
+      if (!el || !state.clockInTime) return;
+      const dur = Date.now() - state.clockInTime.getTime();
+      el.textContent = formatDuration(dur);
+      // Recalculate total
+      let t = 0;
+      state.todayEntries.forEach(e => {
+        const inT = new Date(e.clockIn);
+        const outT = e.clockOut ? new Date(e.clockOut) : null;
+        t += outT ? outT - inT : Date.now() - inT;
+      });
+      t += dur;
+      document.getElementById('todayTotal').textContent = `Total: ${formatDuration(t)}`;
+    }, 10000);
+  }
 }
 
 // ═══════════════════════════════════════
