@@ -13,6 +13,7 @@ const BACKUP_FOLDER_NAME   = 'TimeTracker_Backups';
 // ──────────────────────────────────────────────────
 const ADMIN_HASHES = [
   '1e28b0f96e44',  // ester
+  '4c3b3284e206',  // mk (michael)
 ];
 
 function isAdmin(hash) {
