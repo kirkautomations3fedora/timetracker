@@ -43,17 +43,8 @@
     padding: 32px 0 24px;
   }
 
-  header h1 {
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
-  header .subtitle {
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    margin-top: 4px;
-  }
+  header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+  header .subtitle { color: var(--text-dim); font-size: 0.85rem; margin-top: 4px; }
 
   /* Setup Screen */
   #setup {
@@ -85,9 +76,7 @@
     transition: border-color 0.2s;
   }
 
-  #setup input:focus {
-    border-color: var(--accent);
-  }
+  #setup input:focus { border-color: var(--accent); }
 
   .btn {
     background: var(--accent);
@@ -110,14 +99,12 @@
     color: var(--text);
   }
 
-  .btn-outline:hover {
-    background: var(--surface2);
-  }
-
+  .btn-outline:hover { background: var(--surface2); }
   .btn-green { background: var(--green); }
   .btn-green:hover { background: #00d2a0; }
   .btn-red { background: var(--red); }
   .btn-red:hover { background: #e8836b; }
+  .btn-sm { padding: 6px 14px; font-size: 0.8rem; border-radius: 8px; }
 
   /* Clock Section */
   .clock-section {
@@ -129,10 +116,7 @@
     margin-bottom: 24px;
   }
 
-  .clock-section .greeting {
-    font-size: 1.1rem;
-    margin-bottom: 4px;
-  }
+  .clock-section .greeting { font-size: 1.1rem; margin-bottom: 4px; }
 
   .clock-section .current-time {
     font-size: 2.8rem;
@@ -142,11 +126,7 @@
     letter-spacing: -0.02em;
   }
 
-  .clock-section .status {
-    font-size: 0.9rem;
-    color: var(--text-dim);
-    margin-bottom: 20px;
-  }
+  .clock-section .status { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 20px; }
 
   .status .badge {
     display: inline-block;
@@ -157,15 +137,8 @@
     margin-left: 6px;
   }
 
-  .badge-in {
-    background: rgba(0,184,148,0.15);
-    color: var(--green);
-  }
-
-  .badge-out {
-    background: rgba(225,112,85,0.15);
-    color: var(--red);
-  }
+  .badge-in { background: rgba(0,184,148,0.15); color: var(--green); }
+  .badge-out { background: rgba(225,112,85,0.15); color: var(--red); }
 
   .clock-btn {
     padding: 16px 48px;
@@ -174,13 +147,9 @@
     min-width: 200px;
   }
 
-  .elapsed {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin-top: 12px;
-  }
+  .elapsed { font-size: 0.85rem; color: var(--text-dim); margin-top: 12px; }
 
-  /* Today's Log */
+  /* Cards & Tables */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -236,10 +205,7 @@
     margin-bottom: 16px;
   }
 
-  .cal-nav .period {
-    font-size: 0.95rem;
-    font-weight: 600;
-  }
+  .cal-nav .period { font-size: 0.95rem; font-weight: 600; }
 
   .cal-nav button {
     background: var(--surface2);
@@ -283,11 +249,7 @@
   }
 
   .day-cell:hover { background: var(--surface2); }
-
-  .day-cell.today {
-    border: 1px solid var(--accent);
-  }
-
+  .day-cell.today { border: 1px solid var(--accent); }
   .day-cell.has-hours::after {
     content: '';
     display: block;
@@ -298,10 +260,7 @@
     margin: 2px auto 0;
   }
 
-  .day-cell.selected {
-    background: var(--accent);
-    color: #fff;
-  }
+  .day-cell.selected { background: var(--accent); color: #fff; }
 
   .day-cell .hours-label {
     display: block;
@@ -335,14 +294,8 @@
   }
 
   .employee-row:last-child { border-bottom: none; }
-
   .emp-name { font-weight: 600; }
-
-  .emp-hours {
-    font-variant-numeric: tabular-nums;
-    color: var(--green);
-    font-weight: 600;
-  }
+  .emp-hours { font-variant-numeric: tabular-nums; color: var(--green); font-weight: 600; }
 
   .link-box {
     display: flex;
@@ -392,14 +345,8 @@
     color: var(--text-dim);
   }
 
-  .tab.active {
-    background: var(--accent);
-    color: #fff;
-  }
-
-  .tab:hover:not(.active) {
-    background: var(--surface2);
-  }
+  .tab.active { background: var(--accent); color: #fff; }
+  .tab:hover:not(.active) { background: var(--surface2); }
 
   .spinner {
     display: inline-block;
@@ -442,11 +389,7 @@
     font-size: 0.78rem;
   }
 
-  .hash-display {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    margin-top: 4px;
-  }
+  .hash-display { font-size: 0.8rem; color: var(--text-dim); margin-top: 4px; }
 
   .hash-display code {
     background: var(--surface2);
@@ -455,6 +398,137 @@
     font-family: 'SF Mono', 'Fira Code', monospace;
     font-size: 0.78rem;
     color: var(--orange);
+  }
+
+  /* Weekly report table */
+  .week-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .week-table thead { display: table; width: 100%; table-layout: fixed; }
+  .week-table tbody { display: table; width: 100%; table-layout: fixed; }
+
+  .week-table th, .week-table td {
+    padding: 10px 6px;
+    text-align: center;
+    border-bottom: 1px solid rgba(46,51,69,0.5);
+  }
+
+  .week-table th {
+    color: var(--text-dim);
+    font-weight: 500;
+    font-size: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .week-table th:first-child, .week-table td:first-child {
+    text-align: left;
+    min-width: 100px;
+  }
+
+  .week-table td:last-child { font-weight: 700; color: var(--accent); }
+
+  .week-table .emp-link {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .week-table .emp-link:hover { text-decoration: underline; }
+
+  .week-table .has-val { color: var(--green); }
+  .week-table .no-val { color: var(--text-dim); opacity: 0.4; }
+
+  /* Edit modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  .modal h3 { margin-bottom: 16px; font-size: 1rem; }
+
+  .modal .form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+
+  .modal label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    min-width: 70px;
+  }
+
+  .modal input[type="time"], .modal input[type="date"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    flex: 1;
+  }
+
+  .modal input:focus { border-color: var(--accent); }
+
+  .modal .btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  .entry-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .entry-actions button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .entry-actions button:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .entry-actions button.del:hover {
+    background: var(--red);
+    border-color: var(--red);
   }
 
   @media (max-width: 500px) {
@@ -472,7 +546,6 @@
     <div class="subtitle">Clock in. Clock out. Stay honest.</div>
   </header>
 
-  <!-- CONNECTION ERROR BANNER -->
   <div id="connError" class="hidden" style="background:var(--red);color:#fff;padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;font-size:0.85rem;word-break:break-all;"></div>
 
   <!-- SETUP SCREEN -->
@@ -496,9 +569,10 @@
       <div class="hash-display">Your link: <code id="hashDisplay"></code></div>
     </div>
 
-    <div class="tabs">
+    <div class="tabs" id="empTabs">
       <div class="tab active" onclick="switchTab('today')">Today</div>
       <div class="tab" onclick="switchTab('calendar')">Calendar</div>
+      <div class="tab hidden" id="adminTab" onclick="switchTab('admin')">👥 Team</div>
     </div>
 
     <!-- Today Tab -->
@@ -536,9 +610,38 @@
         <div class="total-hours" id="dayDetailTotal"></div>
       </div>
     </div>
+
+    <!-- Admin Tab (visible to owner + ester) -->
+    <div id="tab-admin" class="hidden">
+      <div class="card">
+        <h3>📊 Weekly Hours — Last 7 Days</h3>
+        <div id="weekReportContainer" style="overflow-x:auto;"></div>
+      </div>
+
+      <!-- Employee detail drill-down -->
+      <div class="card hidden" id="empDetailCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="margin:0;">📋 <span id="empDetailName"></span>'s Entries</h3>
+          <button class="btn btn-sm" onclick="closeEmpDetail()">← Back</button>
+        </div>
+        <div class="cal-nav">
+          <button onclick="shiftEmpWeek(-1)">‹</button>
+          <span class="period" id="empWeekLabel"></span>
+          <button onclick="shiftEmpWeek(1)">›</button>
+        </div>
+        <table class="log-table">
+          <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Duration</th><th></th></tr></thead>
+          <tbody id="empDetailLog"></tbody>
+        </table>
+        <div class="total-hours" id="empDetailTotal"></div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm btn-green" onclick="showAddEntryModal()">+ Add Entry</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- OWNER DASHBOARD -->
+  <!-- OWNER DASHBOARD (for owner_ hash — keeps backward compat) -->
   <div id="ownerDash" class="hidden">
     <div class="clock-section">
       <div class="greeting">👑 Owner Dashboard</div>
@@ -547,11 +650,40 @@
     </div>
 
     <div class="tabs">
-      <div class="tab active" onclick="switchOwnerTab('overview')">Overview</div>
+      <div class="tab active" onclick="switchOwnerTab('week')">📊 Week</div>
+      <div class="tab" onclick="switchOwnerTab('overview')">Overview</div>
       <div class="tab" onclick="switchOwnerTab('employees')">Employees</div>
     </div>
 
-    <div id="otab-overview">
+    <!-- Week Tab -->
+    <div id="otab-week">
+      <div class="card">
+        <h3>📊 Weekly Hours — Last 7 Days</h3>
+        <div id="ownerWeekReportContainer" style="overflow-x:auto;"></div>
+      </div>
+
+      <div class="card hidden" id="ownerEmpDetailCard">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h3 style="margin:0;">📋 <span id="ownerEmpDetailName"></span>'s Entries</h3>
+          <button class="btn btn-sm" onclick="closeOwnerEmpDetail()">← Back</button>
+        </div>
+        <div class="cal-nav">
+          <button onclick="shiftOwnerEmpWeek(-1)">‹</button>
+          <span class="period" id="ownerEmpWeekLabel"></span>
+          <button onclick="shiftOwnerEmpWeek(1)">›</button>
+        </div>
+        <table class="log-table">
+          <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Duration</th><th></th></tr></thead>
+          <tbody id="ownerEmpDetailLog"></tbody>
+        </table>
+        <div class="total-hours" id="ownerEmpDetailTotal"></div>
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm btn-green" onclick="showAddEntryModal()">+ Add Entry</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="otab-overview" class="hidden">
       <div class="card">
         <div class="cal-nav">
           <button onclick="shiftOwnerPeriod(-1)">‹</button>
@@ -575,17 +707,37 @@
   </div>
 </div>
 
+<!-- Edit Modal -->
+<div id="editModal" class="modal-overlay hidden" onclick="if(event.target===this)closeEditModal()">
+  <div class="modal">
+    <h3 id="editModalTitle">Edit Entry</h3>
+    <div class="form-row">
+      <label>Date</label>
+      <input type="date" id="editDate" />
+    </div>
+    <div class="form-row">
+      <label>Clock In</label>
+      <input type="time" id="editClockIn" />
+    </div>
+    <div class="form-row">
+      <label>Clock Out</label>
+      <input type="time" id="editClockOut" />
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-sm btn-outline" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-sm" id="editSaveBtn" onclick="saveEditEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <footer>Data stored in Google Sheets · Backed up weekly</footer>
 
 <script>
 // ═══════════════════════════════════════
-// CONFIG — Set your Apps Script URL here
+// CONFIG
 // ═══════════════════════════════════════
-// API URL: auto-detect based on where the page is served from
-// When served from the Node.js server directly, use relative path
-// When served from GitHub Pages, use the tunnel URL
 const API_URL = 'https://script.google.com/macros/s/AKfycbw6NjDnK6PR1UYWj97Dttw62m8viXf9Rkp_Igmk0CPQXNaS448L33uECmrNp_ZNvCvL/exec';
 
 // ═══════════════════════════════════════
@@ -595,6 +747,7 @@ let state = {
   hash: null,
   name: null,
   isOwner: false,
+  isAdmin: false,
   isClockedIn: false,
   clockInTime: null,
   todayEntries: [],
@@ -602,6 +755,11 @@ let state = {
   periodStart: null,
   ownerPeriodStart: null,
   elapsedInterval: null,
+  // Employee detail drill-down state
+  detailHash: null,
+  detailName: null,
+  detailWeekStart: null,
+  detailContext: null, // 'admin' or 'owner'
 };
 
 // ═══════════════════════════════════════
@@ -609,7 +767,6 @@ let state = {
 // ═══════════════════════════════════════
 (function init() {
   console.log('[TimeTracker] API_URL =', API_URL);
-  // Connection test on load (Apps Script GET returns JSON status)
   fetch(API_URL, { method: 'GET', redirect: 'follow' })
     .then(r => r.text())
     .then(t => { try { return JSON.parse(t); } catch { return { raw: t.slice(0, 100) }; } })
@@ -619,7 +776,7 @@ let state = {
       const errDiv = document.getElementById('connError');
       if (errDiv) {
         errDiv.classList.remove('hidden');
-        errDiv.textContent = `Cannot reach API: ${e.message} | URL: ${API_URL}`;
+        errDiv.textContent = `Cannot reach API: ${e.message}`;
       }
     });
 
@@ -646,12 +803,10 @@ async function generateHash() {
   location.hash = hash;
   state.hash = hash;
   state.name = name;
-  // Register with backend
-  await api('register', { hash, name });
+  const res = await api('register', { hash, name });
+  if (res.isAdmin) state.isAdmin = true;
   loadDashboard();
 }
-
-// Owner access is URL-only — no public UI to generate owner hash
 
 // ═══════════════════════════════════════
 // API
@@ -677,7 +832,7 @@ async function api(action, data = {}) {
     const errDiv = document.getElementById('connError');
     if (errDiv) {
       errDiv.classList.remove('hidden');
-      errDiv.textContent = `API Error: ${e.message} | URL: ${API_URL} | Action: ${action}`;
+      errDiv.textContent = `API Error: ${e.message}`;
     }
     return { error: e.message };
   }
@@ -688,13 +843,15 @@ async function api(action, data = {}) {
 // ═══════════════════════════════════════
 async function loadDashboard() {
   const hash = state.hash;
+
   if (hash.startsWith('owner_')) {
     state.isOwner = true;
+    state.isAdmin = true;
     document.getElementById('setup').classList.add('hidden');
     document.getElementById('ownerDash').classList.remove('hidden');
     document.getElementById('ownerHashDisplay').textContent = location.href;
     state.ownerPeriodStart = getPeriodStart(new Date());
-    loadOwnerReport();
+    loadOwnerWeekReport();
     return;
   }
 
@@ -706,9 +863,15 @@ async function loadDashboard() {
   state.isClockedIn = res.clockedIn || false;
   state.clockInTime = res.clockInTime ? new Date(res.clockInTime) : null;
   state.todayEntries = res.todayEntries || [];
+  state.isAdmin = res.isAdmin || false;
 
   document.getElementById('setup').classList.add('hidden');
   document.getElementById('dashboard').classList.remove('hidden');
+
+  // Show admin tab if user is admin
+  if (state.isAdmin) {
+    document.getElementById('adminTab').classList.remove('hidden');
+  }
 
   updateGreeting();
   updateClockBtn();
@@ -821,29 +984,276 @@ function renderTodayLog() {
 }
 
 // ═══════════════════════════════════════
-// TABS
+// TABS (employee view)
 // ═══════════════════════════════════════
 function switchTab(tab) {
-  document.querySelectorAll('.tabs .tab').forEach((t, i) => {
-    t.classList.toggle('active', (tab === 'today' && i === 0) || (tab === 'calendar' && i === 1));
-  });
+  document.querySelectorAll('#empTabs .tab').forEach(t => t.classList.remove('active'));
+  const tabs = ['today', 'calendar', 'admin'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('#empTabs .tab')[idx].classList.add('active');
+
   document.getElementById('tab-today').classList.toggle('hidden', tab !== 'today');
   document.getElementById('tab-calendar').classList.toggle('hidden', tab !== 'calendar');
+  document.getElementById('tab-admin').classList.toggle('hidden', tab !== 'admin');
 
   if (tab === 'calendar') loadCalendar();
+  if (tab === 'admin') loadAdminWeekReport();
+}
+
+// ═══════════════════════════════════════
+// ADMIN WEEK REPORT (employee admin tab)
+// ═══════════════════════════════════════
+async function loadAdminWeekReport() {
+  const res = await api('weekReport', { hash: state.hash });
+  if (res.error) return;
+  renderWeekTable(res, 'weekReportContainer', 'admin');
+}
+
+// ═══════════════════════════════════════
+// OWNER WEEK REPORT
+// ═══════════════════════════════════════
+async function loadOwnerWeekReport() {
+  const res = await api('weekReport', { hash: state.hash });
+  if (res.error) return;
+  renderWeekTable(res, 'ownerWeekReportContainer', 'owner');
+}
+
+function renderWeekTable(data, containerId, context) {
+  const { days, report } = data;
+  const container = document.getElementById(containerId);
+
+  const dayNames = days.map(d => {
+    const dt = new Date(d + 'T12:00:00');
+    return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  });
+
+  let html = '<table class="week-table"><thead><tr><th>Employee</th>';
+  dayNames.forEach(d => { html += `<th>${d}</th>`; });
+  html += '<th>Total</th></tr></thead><tbody>';
+
+  let grandTotal = 0;
+
+  report.forEach(emp => {
+    html += `<tr><td><a class="emp-link" onclick="openEmpDetail('${emp.hash}','${escHtml(emp.name)}','${context}')">${escHtml(emp.name)}</a></td>`;
+    days.forEach(d => {
+      const ms = emp.daily[d] || 0;
+      if (ms > 0) {
+        html += `<td class="has-val">${formatDurationShort(ms)}</td>`;
+      } else {
+        html += `<td class="no-val">—</td>`;
+      }
+    });
+    html += `<td>${formatDurationShort(emp.weekTotal)}</td></tr>`;
+    grandTotal += emp.weekTotal;
+  });
+
+  html += '</tbody></table>';
+  html += `<div class="period-summary"><span class="label">Company Total</span><span class="value">${formatDuration(grandTotal)}</span></div>`;
+
+  container.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// EMPLOYEE DETAIL DRILL-DOWN (admin edit)
+// ═══════════════════════════════════════
+function openEmpDetail(hash, name, context) {
+  state.detailHash = hash;
+  state.detailName = name;
+  state.detailContext = context;
+
+  // Default to current week (Mon–Sun)
+  const now = new Date();
+  const day = now.getDay();
+  const diff = (day === 0 ? 6 : day - 1);
+  const monday = new Date(now);
+  monday.setDate(monday.getDate() - diff);
+  monday.setHours(0, 0, 0, 0);
+  state.detailWeekStart = monday;
+
+  const cardId = context === 'owner' ? 'ownerEmpDetailCard' : 'empDetailCard';
+  document.getElementById(cardId).classList.remove('hidden');
+
+  loadEmpDetailEntries();
+}
+
+function closeEmpDetail() {
+  document.getElementById('empDetailCard').classList.add('hidden');
+  state.detailHash = null;
+}
+
+function closeOwnerEmpDetail() {
+  document.getElementById('ownerEmpDetailCard').classList.add('hidden');
+  state.detailHash = null;
+}
+
+function shiftEmpWeek(dir) {
+  state.detailWeekStart = new Date(state.detailWeekStart.getTime() + dir * 7 * 86400000);
+  loadEmpDetailEntries();
+}
+
+function shiftOwnerEmpWeek(dir) {
+  shiftEmpWeek(dir);
+}
+
+async function loadEmpDetailEntries() {
+  const start = state.detailWeekStart;
+  const end = new Date(start.getTime() + 7 * 86400000 - 1);
+  const ctx = state.detailContext;
+
+  const labelId = ctx === 'owner' ? 'ownerEmpWeekLabel' : 'empWeekLabel';
+  const nameId = ctx === 'owner' ? 'ownerEmpDetailName' : 'empDetailName';
+  const logId = ctx === 'owner' ? 'ownerEmpDetailLog' : 'empDetailLog';
+  const totalId = ctx === 'owner' ? 'ownerEmpDetailTotal' : 'empDetailTotal';
+
+  document.getElementById(labelId).textContent = `${fmtDate(start)} — ${fmtDate(end)}`;
+  document.getElementById(nameId).textContent = state.detailName;
+
+  const res = await api('getEmployeeEntries', {
+    hash: state.hash,
+    targetHash: state.detailHash,
+    startDate: start.toISOString(),
+    endDate: end.toISOString(),
+  });
+
+  const entries = res.entries || [];
+  const tbody = document.getElementById(logId);
+  tbody.innerHTML = '';
+  let total = 0;
+
+  entries.forEach(e => {
+    const tr = document.createElement('tr');
+    total += (e.durationMs || 0);
+    const ciISO = e.clockInISO || '';
+    const coISO = e.clockOutISO || '';
+    tr.innerHTML = `
+      <td>${e.date}</td>
+      <td>${e.clockIn || '—'}</td>
+      <td>${e.clockOut || '<em>active</em>'}</td>
+      <td>${formatDuration(e.durationMs || 0)}</td>
+      <td>
+        <div class="entry-actions">
+          <button title="Edit" onclick="showEditModal('${state.detailHash}','${e.date}','${ciISO}','${coISO}')">✏️</button>
+          <button class="del" title="Delete" onclick="confirmDeleteEntry('${state.detailHash}','${e.date}','${ciISO}')">🗑</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (entries.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-dim); text-align:center; padding:16px;">No entries this week</td></tr>';
+  }
+
+  document.getElementById(totalId).textContent = `Total: ${formatDuration(total)}`;
+}
+
+// ═══════════════════════════════════════
+// EDIT MODAL
+// ═══════════════════════════════════════
+let editState = { targetHash: null, date: null, originalClockIn: null, mode: 'edit' };
+
+function showEditModal(targetHash, date, clockInISO, clockOutISO) {
+  editState = { targetHash, date, originalClockIn: clockInISO, mode: 'edit' };
+  document.getElementById('editModalTitle').textContent = 'Edit Entry';
+  document.getElementById('editDate').value = date;
+  document.getElementById('editDate').disabled = true;
+
+  if (clockInISO) {
+    const ci = new Date(clockInISO);
+    document.getElementById('editClockIn').value = `${pad(ci.getHours())}:${pad(ci.getMinutes())}`;
+  }
+  if (clockOutISO) {
+    const co = new Date(clockOutISO);
+    document.getElementById('editClockOut').value = `${pad(co.getHours())}:${pad(co.getMinutes())}`;
+  }
+
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function showAddEntryModal() {
+  editState = { targetHash: state.detailHash, date: null, originalClockIn: null, mode: 'add' };
+  document.getElementById('editModalTitle').textContent = 'Add Entry';
+  document.getElementById('editDate').value = '';
+  document.getElementById('editDate').disabled = false;
+  document.getElementById('editClockIn').value = '09:00';
+  document.getElementById('editClockOut').value = '17:00';
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.add('hidden');
+}
+
+async function saveEditEntry() {
+  const date = document.getElementById('editDate').value;
+  const ciTime = document.getElementById('editClockIn').value;
+  const coTime = document.getElementById('editClockOut').value;
+
+  if (!date || !ciTime || !coTime) return toast('Fill all fields');
+
+  const clockIn = `${date}T${ciTime}:00`;
+  const clockOut = `${date}T${coTime}:00`;
+
+  // Convert to ISO (local time — Apps Script will store as-is)
+  const ciISO = new Date(clockIn).toISOString();
+  const coISO = new Date(clockOut).toISOString();
+
+  let res;
+  if (editState.mode === 'edit') {
+    res = await api('editEntry', {
+      hash: state.hash,
+      targetHash: editState.targetHash,
+      date: editState.date,
+      clockIn: ciISO,
+      clockOut: coISO,
+    });
+  } else {
+    res = await api('addEntry', {
+      hash: state.hash,
+      targetHash: editState.targetHash,
+      date,
+      clockIn: ciISO,
+      clockOut: coISO,
+    });
+  }
+
+  if (res.ok) {
+    toast(editState.mode === 'edit' ? '✅ Entry updated' : '✅ Entry added');
+    closeEditModal();
+    loadEmpDetailEntries();
+    // Refresh week report
+    if (state.detailContext === 'owner') loadOwnerWeekReport();
+    else loadAdminWeekReport();
+  }
+}
+
+async function confirmDeleteEntry(targetHash, date, clockInISO) {
+  if (!confirm(`Delete this entry on ${date}?`)) return;
+
+  const res = await api('deleteEntry', {
+    hash: state.hash,
+    targetHash,
+    date,
+    clockIn: clockInISO,
+  });
+
+  if (res.ok) {
+    toast('🗑 Entry deleted');
+    loadEmpDetailEntries();
+    if (state.detailContext === 'owner') loadOwnerWeekReport();
+    else loadAdminWeekReport();
+  }
 }
 
 // ═══════════════════════════════════════
 // CALENDAR (2-WEEK PERIODS)
 // ═══════════════════════════════════════
 function getPeriodStart(date) {
-  // Periods start on Monday, 2-week blocks anchored to epoch
   const d = new Date(date);
   const day = d.getDay();
-  const diff = (day === 0 ? 6 : day - 1); // days since Monday
+  const diff = (day === 0 ? 6 : day - 1);
   d.setDate(d.getDate() - diff);
   d.setHours(0, 0, 0, 0);
-  // Align to 2-week boundary from a reference Monday (Jan 1 2024 was a Monday)
   const ref = new Date(2024, 0, 1);
   const weeks = Math.floor((d - ref) / (7 * 86400000));
   const periodWeeks = Math.floor(weeks / 2) * 2;
@@ -859,8 +1269,7 @@ function shiftPeriod(dir) {
 async function loadCalendar() {
   const start = state.periodStart;
   const end = new Date(start.getTime() + 14 * 86400000 - 1);
-  document.getElementById('periodLabel').textContent =
-    `${fmtDate(start)} — ${fmtDate(end)}`;
+  document.getElementById('periodLabel').textContent = `${fmtDate(start)} — ${fmtDate(end)}`;
 
   const res = await api('getEntries', {
     hash: state.hash,
@@ -884,8 +1293,7 @@ function renderCalendar(periodStart, dayMap) {
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
 
-  const headers = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  headers.forEach(h => {
+  ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach(h => {
     const div = document.createElement('div');
     div.className = 'day-header';
     div.textContent = h;
@@ -943,14 +1351,18 @@ function showDayDetail(dateStr, entries) {
 // OWNER VIEWS
 // ═══════════════════════════════════════
 function switchOwnerTab(tab) {
-  document.querySelectorAll('#ownerDash .tabs .tab').forEach((t, i) => {
-    t.classList.toggle('active', (tab === 'overview' && i === 0) || (tab === 'employees' && i === 1));
-  });
+  document.querySelectorAll('#ownerDash .tabs .tab').forEach(t => t.classList.remove('active'));
+  const tabs = ['week', 'overview', 'employees'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('#ownerDash .tabs .tab')[idx].classList.add('active');
+
+  document.getElementById('otab-week').classList.toggle('hidden', tab !== 'week');
   document.getElementById('otab-overview').classList.toggle('hidden', tab !== 'overview');
   document.getElementById('otab-employees').classList.toggle('hidden', tab !== 'employees');
 
   if (tab === 'employees') loadEmployeeList();
   if (tab === 'overview') loadOwnerReport();
+  if (tab === 'week') loadOwnerWeekReport();
 }
 
 function shiftOwnerPeriod(dir) {
@@ -961,8 +1373,7 @@ function shiftOwnerPeriod(dir) {
 async function loadOwnerReport() {
   const start = state.ownerPeriodStart;
   const end = new Date(start.getTime() + 14 * 86400000 - 1);
-  document.getElementById('ownerPeriodLabel').textContent =
-    `${fmtDate(start)} — ${fmtDate(end)}`;
+  document.getElementById('ownerPeriodLabel').textContent = `${fmtDate(start)} — ${fmtDate(end)}`;
 
   const res = await api('ownerReport', {
     hash: state.hash,
@@ -979,7 +1390,7 @@ async function loadOwnerReport() {
     companyTotal += (emp.totalMs || 0);
     const row = document.createElement('div');
     row.className = 'employee-row';
-    row.innerHTML = `<span class="emp-name">${emp.name}</span><span class="emp-hours">${formatDuration(emp.totalMs || 0)}</span>`;
+    row.innerHTML = `<span class="emp-name">${escHtml(emp.name)}</span><span class="emp-hours">${formatDuration(emp.totalMs || 0)}</span>`;
     container.appendChild(row);
   });
 
@@ -1000,9 +1411,7 @@ async function loadEmployeeList() {
     const row = document.createElement('div');
     row.className = 'employee-row';
     row.innerHTML = `
-      <div>
-        <div class="emp-name">${emp.name}</div>
-      </div>
+      <div><div class="emp-name">${escHtml(emp.name)}</div></div>
       <span class="badge ${emp.clockedIn ? 'badge-in' : 'badge-out'}">${emp.clockedIn ? 'In' : 'Out'}</span>
     `;
     container.appendChild(row);
@@ -1031,6 +1440,20 @@ function formatDuration(ms) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+function formatDurationShort(ms) {
+  if (!ms || ms < 0) return '0h';
+  const h = (ms / 3600000).toFixed(1);
+  return `${h}h`;
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
 function startLiveClock() {
   function tick() {
     const now = new Date();
@@ -1042,11 +1465,6 @@ function startLiveClock() {
   }
   tick();
   setInterval(tick, 1000);
-}
-
-function copyText(text) {
-  navigator.clipboard.writeText(text);
-  toast('Copied!');
 }
 
 function toast(msg) {

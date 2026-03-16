@@ -8,6 +8,19 @@ const SHEET_NAME_ENTRIES   = 'TimeEntries';  // hash | date | clockIn | clockOut
 const BACKUP_FOLDER_NAME   = 'TimeTracker_Backups';
 
 // ──────────────────────────────────────────────────
+// ADMIN HASHES — employees who get admin (view all + edit) access
+// Add employee hashes here. Owner (owner_*) always has admin.
+// ──────────────────────────────────────────────────
+const ADMIN_HASHES = [
+  '1e28b0f96e44',  // ester
+];
+
+function isAdmin(hash) {
+  if (hash && hash.startsWith('owner_')) return true;
+  return ADMIN_HASHES.includes(hash);
+}
+
+// ──────────────────────────────────────────────────
 // Web App Entry Points
 // ──────────────────────────────────────────────────
 function doPost(e) {
@@ -17,14 +30,19 @@ function doPost(e) {
 
   try {
     switch (action) {
-      case 'register':     result = registerEmployee(body.hash, body.name); break;
-      case 'status':       result = getStatus(body.hash); break;
-      case 'clockIn':      result = clockIn(body.hash); break;
-      case 'clockOut':     result = clockOut(body.hash); break;
-      case 'getEntries':   result = getEntries(body.hash, body.startDate, body.endDate); break;
-      case 'ownerReport':  result = ownerReport(body.hash, body.startDate, body.endDate); break;
-      case 'listEmployees':result = listEmployees(body.hash); break;
-      default:             result = { error: 'Unknown action' };
+      case 'register':      result = registerEmployee(body.hash, body.name); break;
+      case 'status':        result = getStatus(body.hash); break;
+      case 'clockIn':       result = clockIn(body.hash); break;
+      case 'clockOut':      result = clockOut(body.hash); break;
+      case 'getEntries':    result = getEntries(body.hash, body.startDate, body.endDate); break;
+      case 'ownerReport':   result = ownerReport(body.hash, body.startDate, body.endDate); break;
+      case 'weekReport':    result = weekReport(body.hash); break;
+      case 'listEmployees': result = listEmployees(body.hash); break;
+      case 'editEntry':     result = editEntry(body.hash, body.targetHash, body.date, body.clockIn, body.clockOut); break;
+      case 'deleteEntry':   result = deleteEntry(body.hash, body.targetHash, body.date, body.clockIn); break;
+      case 'addEntry':      result = addEntry(body.hash, body.targetHash, body.date, body.clockIn, body.clockOut); break;
+      case 'getEmployeeEntries': result = getEmployeeEntries(body.hash, body.targetHash, body.startDate, body.endDate); break;
+      default:              result = { error: 'Unknown action' };
     }
   } catch (err) {
     result = { error: err.message };
@@ -50,12 +68,12 @@ function registerEmployee(hash, name) {
 
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === hash) {
-      return { ok: true, name: data[i][1] }; // already registered
+      return { ok: true, name: data[i][1], isAdmin: isAdmin(hash) };
     }
   }
 
   sheet.appendRow([hash, name, false, '']);
-  return { ok: true, name };
+  return { ok: true, name, isAdmin: isAdmin(hash) };
 }
 
 // ──────────────────────────────────────────────────
@@ -78,6 +96,7 @@ function getStatus(hash) {
     clockedIn: row[2] === true || row[2] === 'TRUE' || row[2] === 'true',
     clockInTime: row[3] || null,
     todayEntries,
+    isAdmin: isAdmin(hash),
   };
 }
 
@@ -90,7 +109,7 @@ function clockIn(hash) {
   let rowIdx = -1;
 
   for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === hash) { rowIdx = i + 1; break; } // 1-indexed for sheet
+    if (data[i][0] === hash) { rowIdx = i + 1; break; }
   }
 
   if (rowIdx === -1) return { error: 'Not registered' };
@@ -128,11 +147,9 @@ function clockOut(hash) {
   const durationMs = now.getTime() - start.getTime();
   const dateStr = start.toISOString().slice(0, 10);
 
-  // Add entry
   const entrySheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
   entrySheet.appendRow([hash, dateStr, start.toISOString(), now.toISOString(), durationMs]);
 
-  // Update employee status
   empSheet.getRange(rowIdx, 3).setValue(false);
   empSheet.getRange(rowIdx, 4).setValue('');
 
@@ -141,7 +158,7 @@ function clockOut(hash) {
 }
 
 // ──────────────────────────────────────────────────
-// GET ENTRIES (for calendar)
+// GET ENTRIES (for calendar — own entries)
 // ──────────────────────────────────────────────────
 function getEntries(hash, startDate, endDate) {
   const sheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
@@ -155,7 +172,9 @@ function getEntries(hash, startDate, endDate) {
       entries.push({
         date: data[i][1],
         clockIn: formatTimeFromISO(data[i][2]),
+        clockInISO: data[i][2],
         clockOut: data[i][3] ? formatTimeFromISO(data[i][3]) : null,
+        clockOutISO: data[i][3] || null,
         durationMs: data[i][4],
       });
     }
@@ -165,10 +184,39 @@ function getEntries(hash, startDate, endDate) {
 }
 
 // ──────────────────────────────────────────────────
-// OWNER REPORT
+// GET EMPLOYEE ENTRIES (admin only — view any employee)
 // ──────────────────────────────────────────────────
-function ownerReport(ownerHash, startDate, endDate) {
-  if (!ownerHash.startsWith('owner_')) return { error: 'Unauthorized' };
+function getEmployeeEntries(adminHash, targetHash, startDate, endDate) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const sheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
+  const data = sheet.getDataRange().getValues();
+  const start = startDate.slice(0, 10);
+  const end = endDate.slice(0, 10);
+  const entries = [];
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === targetHash && data[i][1] >= start && data[i][1] <= end) {
+      entries.push({
+        date: data[i][1],
+        clockIn: formatTimeFromISO(data[i][2]),
+        clockInISO: data[i][2],
+        clockOut: data[i][3] ? formatTimeFromISO(data[i][3]) : null,
+        clockOutISO: data[i][3] || null,
+        durationMs: data[i][4],
+        rowIndex: i + 1,
+      });
+    }
+  }
+
+  return { entries };
+}
+
+// ──────────────────────────────────────────────────
+// OWNER / ADMIN REPORT (2-week period)
+// ──────────────────────────────────────────────────
+function ownerReport(adminHash, startDate, endDate) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
 
   const empSheet = getOrCreateSheet(SHEET_NAME_EMPLOYEES, ['Hash', 'Name', 'ClockedIn', 'CurrentClockIn']);
   const entrySheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
@@ -178,13 +226,11 @@ function ownerReport(ownerHash, startDate, endDate) {
   const start = startDate.slice(0, 10);
   const end = endDate.slice(0, 10);
 
-  // Build map of hash → name
   const nameMap = {};
   for (let i = 1; i < employees.length; i++) {
     nameMap[employees[i][0]] = employees[i][1];
   }
 
-  // Aggregate hours per employee
   const hoursMap = {};
   for (let i = 1; i < entries.length; i++) {
     const h = entries[i][0];
@@ -196,7 +242,7 @@ function ownerReport(ownerHash, startDate, endDate) {
 
   const report = [];
   for (const h of Object.keys(nameMap)) {
-    report.push({ name: nameMap[h], totalMs: hoursMap[h] || 0 });
+    report.push({ hash: h, name: nameMap[h], totalMs: hoursMap[h] || 0 });
   }
 
   report.sort((a, b) => b.totalMs - a.totalMs);
@@ -204,10 +250,64 @@ function ownerReport(ownerHash, startDate, endDate) {
 }
 
 // ──────────────────────────────────────────────────
-// LIST EMPLOYEES
+// WEEK REPORT — last 7 days, broken down by day per employee
 // ──────────────────────────────────────────────────
-function listEmployees(ownerHash) {
-  if (!ownerHash.startsWith('owner_')) return { error: 'Unauthorized' };
+function weekReport(adminHash) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const empSheet = getOrCreateSheet(SHEET_NAME_EMPLOYEES, ['Hash', 'Name', 'ClockedIn', 'CurrentClockIn']);
+  const entrySheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
+
+  const employees = empSheet.getDataRange().getValues();
+  const entries = entrySheet.getDataRange().getValues();
+
+  // Last 7 days
+  const now = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
+  const nameMap = {};
+  const hashList = [];
+  for (let i = 1; i < employees.length; i++) {
+    nameMap[employees[i][0]] = employees[i][1];
+    hashList.push(employees[i][0]);
+  }
+
+  // Build: { hash: { date: totalMs } }
+  const breakdown = {};
+  for (let i = 1; i < entries.length; i++) {
+    const h = entries[i][0];
+    const d = entries[i][1];
+    if (days.includes(d)) {
+      if (!breakdown[h]) breakdown[h] = {};
+      breakdown[h][d] = (breakdown[h][d] || 0) + (entries[i][4] || 0);
+    }
+  }
+
+  const report = hashList.map(h => {
+    const daily = {};
+    let weekTotal = 0;
+    days.forEach(d => {
+      const ms = (breakdown[h] && breakdown[h][d]) || 0;
+      daily[d] = ms;
+      weekTotal += ms;
+    });
+    return { hash: h, name: nameMap[h], daily, weekTotal };
+  });
+
+  report.sort((a, b) => b.weekTotal - a.weekTotal);
+  return { days, report };
+}
+
+// ──────────────────────────────────────────────────
+// LIST EMPLOYEES (admin only)
+// ──────────────────────────────────────────────────
+function listEmployees(adminHash) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
 
   const sheet = getOrCreateSheet(SHEET_NAME_EMPLOYEES, ['Hash', 'Name', 'ClockedIn', 'CurrentClockIn']);
   const data = sheet.getDataRange().getValues();
@@ -222,6 +322,71 @@ function listEmployees(ownerHash) {
   }
 
   return { employees };
+}
+
+// ──────────────────────────────────────────────────
+// EDIT ENTRY (admin only)
+// ──────────────────────────────────────────────────
+function editEntry(adminHash, targetHash, date, newClockIn, newClockOut) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const sheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
+  const data = sheet.getDataRange().getValues();
+  const dateStr = date.slice(0, 10);
+
+  // Find matching row by hash + date + clockIn
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === targetHash && data[i][1] === dateStr) {
+      const rowIdx = i + 1;
+      const ciDate = new Date(newClockIn);
+      const coDate = new Date(newClockOut);
+      const durationMs = coDate.getTime() - ciDate.getTime();
+
+      sheet.getRange(rowIdx, 3).setValue(newClockIn);
+      sheet.getRange(rowIdx, 4).setValue(newClockOut);
+      sheet.getRange(rowIdx, 5).setValue(durationMs);
+
+      return { ok: true };
+    }
+  }
+
+  return { error: 'Entry not found' };
+}
+
+// ──────────────────────────────────────────────────
+// DELETE ENTRY (admin only)
+// ──────────────────────────────────────────────────
+function deleteEntry(adminHash, targetHash, date, clockIn) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const sheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
+  const data = sheet.getDataRange().getValues();
+  const dateStr = date.slice(0, 10);
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === targetHash && data[i][1] === dateStr && data[i][2] === clockIn) {
+      sheet.deleteRow(i + 1);
+      return { ok: true };
+    }
+  }
+
+  return { error: 'Entry not found' };
+}
+
+// ──────────────────────────────────────────────────
+// ADD ENTRY (admin only)
+// ──────────────────────────────────────────────────
+function addEntry(adminHash, targetHash, date, clockIn, clockOut) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const sheet = getOrCreateSheet(SHEET_NAME_ENTRIES, ['Hash', 'Date', 'ClockIn', 'ClockOut', 'DurationMs']);
+  const ciDate = new Date(clockIn);
+  const coDate = new Date(clockOut);
+  const durationMs = coDate.getTime() - ciDate.getTime();
+  const dateStr = date.slice(0, 10);
+
+  sheet.appendRow([targetHash, dateStr, clockIn, clockOut, durationMs]);
+  return { ok: true };
 }
 
 // ──────────────────────────────────────────────────
@@ -277,13 +442,11 @@ function weeklyBackup() {
   const dateStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');
   const backupName = `TimeTracker_Backup_${dateStr}`;
 
-  // Copy the entire spreadsheet
   const file = DriveApp.getFileById(ss.getId());
   const copy = file.makeCopy(backupName, folder);
 
   Logger.log(`Backup created: ${backupName} (${copy.getId()})`);
 
-  // Clean up old backups (keep last 8 = ~2 months)
   const files = folder.getFiles();
   const allFiles = [];
   while (files.hasNext()) {
@@ -307,14 +470,12 @@ function getOrCreateFolder(name) {
 // SETUP TRIGGER (run once manually)
 // ──────────────────────────────────────────────────
 function setupWeeklyBackupTrigger() {
-  // Remove existing triggers for this function
   ScriptApp.getProjectTriggers().forEach(t => {
     if (t.getHandlerFunction() === 'weeklyBackup') {
       ScriptApp.deleteTrigger(t);
     }
   });
 
-  // Create weekly trigger (every Sunday at 2 AM)
   ScriptApp.newTrigger('weeklyBackup')
     .timeBased()
     .onWeekDay(ScriptApp.WeekDay.SUNDAY)
