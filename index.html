@@ -836,10 +836,9 @@
 <footer>TimeTracker Pro · Secured & backed up</footer>
 
 <script>
-const TUNNEL_URL = 'https://currency-underwear-website-onion.trycloudflare.com';
 const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
   ? '/api'
-  : TUNNEL_URL + '/api';
+  : 'https://script.google.com/macros/s/AKfycbxI2m8KDMqF2sjPmhZ4A9BBDgK73frZyYvIl_GPqefN4mL09Gjk3PWHrIWv88rr-EwY/exec';
 
 let state = {
   hash: null, name: null, isOwner: false, isAdmin: false,
