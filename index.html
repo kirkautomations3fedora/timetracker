@@ -841,12 +841,6 @@ const API_URL = (location.hostname === 'localhost' || location.hostname === '127
   ? '/api'
   : TUNNEL_URL + '/api';
 
-// If on GitHub Pages, redirect to tunnel (serves both frontend + API)
-if (location.hostname.includes('github.io')) {
-  const hash = location.hash || '';
-  location.href = TUNNEL_URL + '/' + hash;
-}
-
 let state = {
   hash: null, name: null, isOwner: false, isAdmin: false,
   isClockedIn: false, clockInTime: null, todayEntries: [],
