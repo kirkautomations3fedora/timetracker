@@ -1,12 +1,10 @@
 // ═══════════════════════════════════════
 // Time Tracker Backend — Node.js + JSON
-// Replaces Google Apps Script entirely
 // ═══════════════════════════════════════
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
-
 const crypto = require('crypto');
 const { syncToSheets, SHEET_ID } = require('./sheets-sync');
 
@@ -17,11 +15,21 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 // Owner passkey: SHA-256('openclaw1').slice(0,12) prefixed with 'owner_'
 const OWNER_HASH = 'owner_' + crypto.createHash('sha256').update('openclaw1').digest('hex').slice(0, 12);
 
+// Admin hashes — employees who get admin (view all + edit) access
+const ADMIN_HASHES = [
+  '1e28b0f96e44',  // ester
+];
+
 function isValidOwner(hash) {
   return hash === OWNER_HASH;
 }
 
-// Debounced sync to Google Sheets (sync 2s after last write)
+function isAdmin(hash) {
+  if (hash && hash.startsWith('owner_')) return hash === OWNER_HASH;
+  return ADMIN_HASHES.includes(hash);
+}
+
+// Debounced sync to Google Sheets
 let syncTimer = null;
 function scheduleSheetsSync() {
   if (syncTimer) clearTimeout(syncTimer);
@@ -62,10 +70,9 @@ function saveData(data) {
 }
 
 // ═══════════════════════════════════════
-// API ENDPOINT (compatible with Apps Script frontend)
+// API ENDPOINT
 // ═══════════════════════════════════════
 app.post('/api', (req, res) => {
-  // Handle both JSON and text/plain (Apps Script CORS workaround)
   let body;
   if (typeof req.body === 'string') {
     try { body = JSON.parse(req.body); } catch { return res.json({ error: 'Invalid JSON' }); }
@@ -78,14 +85,19 @@ app.post('/api', (req, res) => {
 
   try {
     switch (action) {
-      case 'register':     result = registerEmployee(body.hash, body.name); break;
-      case 'status':       result = getStatus(body.hash); break;
-      case 'clockIn':      result = clockIn(body.hash); break;
-      case 'clockOut':     result = clockOut(body.hash); break;
-      case 'getEntries':   result = getEntries(body.hash, body.startDate, body.endDate); break;
-      case 'ownerReport':  result = ownerReport(body.hash, body.startDate, body.endDate); break;
-      case 'listEmployees':result = listEmployees(body.hash); break;
-      default:             result = { error: 'Unknown action: ' + action };
+      case 'register':          result = registerEmployee(body.hash, body.name); break;
+      case 'status':            result = getStatus(body.hash); break;
+      case 'clockIn':           result = clockIn(body.hash); break;
+      case 'clockOut':          result = clockOut(body.hash); break;
+      case 'getEntries':        result = getEntries(body.hash, body.startDate, body.endDate); break;
+      case 'ownerReport':       result = ownerReport(body.hash, body.startDate, body.endDate); break;
+      case 'weekReport':        result = weekReport(body.hash); break;
+      case 'listEmployees':     result = listEmployees(body.hash); break;
+      case 'editEntry':         result = editEntry(body.hash, body.targetHash, body.date, body.clockIn, body.clockOut); break;
+      case 'deleteEntry':       result = deleteEntry(body.hash, body.targetHash, body.date, body.clockIn); break;
+      case 'addEntry':          result = addEntry(body.hash, body.targetHash, body.date, body.clockIn, body.clockOut); break;
+      case 'getEmployeeEntries':result = getEmployeeEntries(body.hash, body.targetHash, body.startDate, body.endDate); break;
+      default:                  result = { error: 'Unknown action: ' + action };
     }
   } catch (err) {
     result = { error: err.message };
@@ -94,7 +106,6 @@ app.post('/api', (req, res) => {
   res.json(result);
 });
 
-// Also handle GET for health check
 app.get('/api', (req, res) => {
   res.json({ status: 'ok', message: 'Time Tracker API. Use POST.' });
 });
@@ -105,12 +116,12 @@ app.get('/api', (req, res) => {
 function registerEmployee(hash, name) {
   const data = loadData();
   const existing = data.employees.find(e => e.hash === hash);
-  if (existing) return { ok: true, name: existing.name };
+  if (existing) return { ok: true, name: existing.name, isAdmin: isAdmin(hash) };
 
   data.employees.push({ hash, name, clockedIn: false, currentClockIn: '' });
   saveData(data);
   scheduleSheetsSync();
-  return { ok: true, name };
+  return { ok: true, name, isAdmin: isAdmin(hash) };
 }
 
 // ═══════════════════════════════════════
@@ -127,6 +138,7 @@ function getStatus(hash) {
     clockedIn: emp.clockedIn,
     clockInTime: emp.currentClockIn || null,
     todayEntries,
+    isAdmin: isAdmin(hash),
   };
 }
 
@@ -180,7 +192,7 @@ function clockOut(hash) {
 }
 
 // ═══════════════════════════════════════
-// GET ENTRIES (calendar)
+// GET ENTRIES (calendar — own entries)
 // ═══════════════════════════════════════
 function getEntries(hash, startDate, endDate) {
   const data = loadData();
@@ -192,7 +204,9 @@ function getEntries(hash, startDate, endDate) {
     .map(e => ({
       date: e.date,
       clockIn: formatTime(e.clockIn),
+      clockInISO: e.clockIn,
       clockOut: e.clockOut ? formatTime(e.clockOut) : null,
+      clockOutISO: e.clockOut || null,
       durationMs: e.durationMs,
     }));
 
@@ -200,10 +214,34 @@ function getEntries(hash, startDate, endDate) {
 }
 
 // ═══════════════════════════════════════
-// OWNER REPORT
+// GET EMPLOYEE ENTRIES (admin only)
 // ═══════════════════════════════════════
-function ownerReport(ownerHash, startDate, endDate) {
-  if (!isValidOwner(ownerHash)) return { error: 'Unauthorized — invalid passkey' };
+function getEmployeeEntries(adminHash, targetHash, startDate, endDate) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const data = loadData();
+  const start = startDate.slice(0, 10);
+  const end = endDate.slice(0, 10);
+
+  const entries = data.entries
+    .filter(e => e.hash === targetHash && e.date >= start && e.date <= end)
+    .map((e, i) => ({
+      date: e.date,
+      clockIn: formatTime(e.clockIn),
+      clockInISO: e.clockIn,
+      clockOut: e.clockOut ? formatTime(e.clockOut) : null,
+      clockOutISO: e.clockOut || null,
+      durationMs: e.durationMs,
+    }));
+
+  return { entries };
+}
+
+// ═══════════════════════════════════════
+// OWNER / ADMIN REPORT (2-week period)
+// ═══════════════════════════════════════
+function ownerReport(adminHash, startDate, endDate) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
 
   const data = loadData();
   const start = startDate.slice(0, 10);
@@ -220,6 +258,7 @@ function ownerReport(ownerHash, startDate, endDate) {
   data.employees.forEach(e => { nameMap[e.hash] = e.name; });
 
   const report = Object.keys(nameMap).map(h => ({
+    hash: h,
     name: nameMap[h],
     totalMs: hoursMap[h] || 0,
   }));
@@ -229,18 +268,128 @@ function ownerReport(ownerHash, startDate, endDate) {
 }
 
 // ═══════════════════════════════════════
-// LIST EMPLOYEES
+// WEEK REPORT — last 7 days, broken down by day per employee
 // ═══════════════════════════════════════
-function listEmployees(ownerHash) {
-  if (!isValidOwner(ownerHash)) return { error: 'Unauthorized — invalid passkey' };
+function weekReport(adminHash) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const data = loadData();
+  const now = new Date();
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    days.push(d.toISOString().slice(0, 10));
+  }
+
+  const nameMap = {};
+  const hashList = [];
+  data.employees.forEach(e => {
+    nameMap[e.hash] = e.name;
+    hashList.push(e.hash);
+  });
+
+  const breakdown = {};
+  data.entries.forEach(e => {
+    if (days.includes(e.date)) {
+      if (!breakdown[e.hash]) breakdown[e.hash] = {};
+      breakdown[e.hash][e.date] = (breakdown[e.hash][e.date] || 0) + (e.durationMs || 0);
+    }
+  });
+
+  const report = hashList.map(h => {
+    const daily = {};
+    let weekTotal = 0;
+    days.forEach(d => {
+      const ms = (breakdown[h] && breakdown[h][d]) || 0;
+      daily[d] = ms;
+      weekTotal += ms;
+    });
+    return { hash: h, name: nameMap[h], daily, weekTotal };
+  });
+
+  report.sort((a, b) => b.weekTotal - a.weekTotal);
+  return { days, report };
+}
+
+// ═══════════════════════════════════════
+// LIST EMPLOYEES (admin only)
+// ═══════════════════════════════════════
+function listEmployees(adminHash) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
 
   const data = loadData();
   return {
     employees: data.employees.map(e => ({
+      hash: e.hash,
       name: e.name,
       clockedIn: e.clockedIn,
     })),
   };
+}
+
+// ═══════════════════════════════════════
+// EDIT ENTRY (admin only)
+// ═══════════════════════════════════════
+function editEntry(adminHash, targetHash, date, newClockIn, newClockOut) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const data = loadData();
+  const dateStr = date.slice(0, 10);
+
+  const entry = data.entries.find(e => e.hash === targetHash && e.date === dateStr);
+  if (!entry) return { error: 'Entry not found' };
+
+  const ciDate = new Date(newClockIn);
+  const coDate = new Date(newClockOut);
+  entry.clockIn = newClockIn;
+  entry.clockOut = newClockOut;
+  entry.durationMs = coDate.getTime() - ciDate.getTime();
+
+  saveData(data);
+  scheduleSheetsSync();
+  return { ok: true };
+}
+
+// ═══════════════════════════════════════
+// DELETE ENTRY (admin only)
+// ═══════════════════════════════════════
+function deleteEntry(adminHash, targetHash, date, clockIn) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const data = loadData();
+  const dateStr = date.slice(0, 10);
+
+  const idx = data.entries.findIndex(e => e.hash === targetHash && e.date === dateStr && e.clockIn === clockIn);
+  if (idx === -1) return { error: 'Entry not found' };
+
+  data.entries.splice(idx, 1);
+  saveData(data);
+  scheduleSheetsSync();
+  return { ok: true };
+}
+
+// ═══════════════════════════════════════
+// ADD ENTRY (admin only)
+// ═══════════════════════════════════════
+function addEntry(adminHash, targetHash, date, clockIn, clockOut) {
+  if (!isAdmin(adminHash)) return { error: 'Unauthorized' };
+
+  const data = loadData();
+  const ciDate = new Date(clockIn);
+  const coDate = new Date(clockOut);
+
+  data.entries.push({
+    hash: targetHash,
+    date: date.slice(0, 10),
+    clockIn,
+    clockOut,
+    durationMs: coDate.getTime() - ciDate.getTime(),
+  });
+
+  saveData(data);
+  scheduleSheetsSync();
+  return { ok: true };
 }
 
 // ═══════════════════════════════════════

@@ -738,7 +738,9 @@
 // ═══════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycbw6NjDnK6PR1UYWj97Dttw62m8viXf9Rkp_Igmk0CPQXNaS448L33uECmrNp_ZNvCvL/exec';
+const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? '/api'
+  : 'https://script.google.com/macros/s/AKfycbw6NjDnK6PR1UYWj97Dttw62m8viXf9Rkp_Igmk0CPQXNaS448L33uECmrNp_ZNvCvL/exec';
 
 // ═══════════════════════════════════════
 // STATE
