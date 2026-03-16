@@ -836,7 +836,16 @@
 <footer>TimeTracker Pro · Secured & backed up</footer>
 
 <script>
-const API_URL = '/api';
+const TUNNEL_URL = 'https://currency-underwear-website-onion.trycloudflare.com';
+const API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? '/api'
+  : TUNNEL_URL + '/api';
+
+// If on GitHub Pages, redirect to tunnel (serves both frontend + API)
+if (location.hostname.includes('github.io')) {
+  const hash = location.hash || '';
+  location.href = TUNNEL_URL + '/' + hash;
+}
 
 let state = {
   hash: null, name: null, isOwner: false, isAdmin: false,
